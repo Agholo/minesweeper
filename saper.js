@@ -12,15 +12,13 @@ function restart() {
         b.disabled = false;
     })
     let board = Array(10).fill().map(() => Array(10).fill(0));
-    let counter = 0;
     let cache = [];
-    while (counter < 10) {
+    while (cache.length < 10) {
         let x = Math.floor(Math.random() * 10);
         let y = Math.floor(Math.random() * 10);
         if (board[x][y] !== "💣") {
             cache.push({ x: x, y: y });
             board[x][y] = "💣";
-            counter++;
         }
     }
     for (let bomb of cache) {
@@ -37,6 +35,7 @@ function restart() {
             }
         }
     }
+    console.log(cnt)
     return board
 }
 function open(button,i){
@@ -50,12 +49,14 @@ function open(button,i){
                     let dy = e.y + j;
                     if (dx >= 0 && dx < 10 && dy >= 0 && dy < 10) {
                         let target = fild[dx * 10 + dy];
-                        target.disabled = true
-                        if (target.innerText === "" || target.innerText === "🚩") {
-                            target.innerText = nt[dx][dy];
+                        if (!target.disabled || target.innerText === "🚩") {
+                            target.innerText = nt[dx][dy] === 0 ? "" : nt[dx][dy];
+                            target.disabled = true
                             cnt++
                             if (nt[dx][dy] === 0) {
                                 cache.push({ x: dx, y: dy });
+                            } else {
+                                target.disabled = true;
                             }
                         }
                     }
@@ -65,17 +66,19 @@ function open(button,i){
         if (cache.length > 0) open0(cache);
     }
 	button.addEventListener( "click", () => {
+        if(button.innerText === '🚩') return
         cnt++
-        button.innerText = nt[Math.floor(i / 10)][i % 10]
+        button.innerText = nt[Math.floor(i / 10)][i % 10] === 0 ? "" : nt[Math.floor(i / 10)][i % 10]; 
         button.disabled = true
         if(nt[Math.floor(i / 10)][i % 10] === "💣"){
             fild.forEach( (b,index) => {
-                b.innerText = nt[Math.floor(index / 10)][index % 10];
+                b.innerText = nt[Math.floor(index / 10)][index % 10] === 0 ? "" : nt[Math.floor(index / 10)][index % 10];
                 b.disabled = true;
             })
         }
+        console.log(cnt)
         if(nt[Math.floor(i / 10)][i % 10] === 0){
-            open0([{x:Math.floor(i / 10),y:i % 10}])
+            open0([{x: Math.floor(i / 10), y: i % 10}])
         }
         if(cnt === 90){
             nt = restart()
@@ -85,7 +88,6 @@ function open(button,i){
         e.preventDefault();
         if(button.innerText === '🚩' || button.innerText === '') {
             button.innerText = button.innerText === '🚩' ? "" : '🚩';
-            button.disabled = button.disabled ? false : true;
         }
     })
 }
